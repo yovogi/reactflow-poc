@@ -1,0 +1,24 @@
+.custom-node {
+    height: 80px;
+    width:300px;
+    border: 1px solid #eee;
+    padding: 5px;
+    border-radius: 5px;
+    background: rgb(250, 245, 245);
+    border:solid 1px;
+    border-color: black;
+    border-radius: 2;
+    display: flex ;
+    position: relative;
+    z-index: 100;
+  }
+  
+  .custom-node label {
+    display: block;
+    color: rgb(16, 13, 13);
+    font-size: 12px;    
+  }
+
+  .custom-node:hover{
+    background-color: rgb(215, 225, 250);
+  }
