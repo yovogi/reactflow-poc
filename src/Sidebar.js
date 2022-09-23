@@ -2,7 +2,7 @@ import React from "react";
 import { edgesData, nodesData } from "./initial-elements";
 import { edgesData2, nodesData2 } from "./data2";
 
-const Sidebar = ({ setNodes, setEdges }) => {
+const Sidebar = ({ setNodes, setEdges, onHighlight, isHighlight }) => {
   const onDragStart = (event, nodeType) => {
     event.dataTransfer.setData("application/reactflow", nodeType);
     event.dataTransfer.effectAllowed = "move";
@@ -49,6 +49,11 @@ const Sidebar = ({ setNodes, setEdges }) => {
         Custom Group Node
       </div>
       <div>
+        <button onClick={() => onHighlight()}>
+          {isHighlight
+            ? "Un-highlight life cycle stages"
+            : "Highlight life cycle stages"}
+        </button>
         <button
           onClick={() => {
             setNodes(nodesData);

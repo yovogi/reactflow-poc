@@ -34,6 +34,7 @@ const NestedFlow = () => {
   const [height, setHeight] = useState(100);
   const [color, setColor] = useState("#FF0000");
   const [isDraggable, setIsDraggable] = useState(true);
+  const [isHighlight, setHiglight] = useState(true);
 
   const selectedNode = nodes?.find((n) => n.selected === true);
 
@@ -44,8 +45,6 @@ const NestedFlow = () => {
       console.log(nodes);
       console.log(edges);
     }, 2000);
-
-    console.log(isDraggable);
 
     setNodes((nds) =>
       nds.map((node) => {
@@ -71,6 +70,15 @@ const NestedFlow = () => {
       })
     );
 
+    setNodes((nds) =>
+      nds.map((node) => {
+        node.style = {
+          ...node.style,
+        };
+        return node;
+      })
+    );
+
     return () => {
       clearInterval(timer);
     };
@@ -84,6 +92,8 @@ const NestedFlow = () => {
     height,
     color,
     isDraggable,
+    isHighlight,
+    setHiglight,
   ]);
 
   const onConnect = useCallback((connection) => {
@@ -168,10 +178,38 @@ const NestedFlow = () => {
     }
   };
 
+  const onHighlight = () => {
+    if (isHighlight) {
+      setNodes(
+        nodes.map((node) => {
+          if (node.style.backgroundColor) {
+            node.data.backgroundColor = node.style.backgroundColor;
+            node.style.backgroundColor = "#ffffff";
+          }
+          return node;
+        })
+      );
+      setHiglight(false);
+    } else {
+      setNodes(
+        nodes.map((node) => {
+          node.style.backgroundColor = node.data.backgroundColor;
+          return node;
+        })
+      );
+      setHiglight(true);
+    }
+  };
+
   return (
     <div>
       <div style={{ height: 800 }} className="dndflow">
-        <Sidebar setNodes={setNodes} setEdges={setEdges} />
+        <Sidebar
+          setNodes={setNodes}
+          setEdges={setEdges}
+          onHighlight={onHighlight}
+          isHighlight={isHighlight}
+        />
         <ReactFlowProvider>
           <div className="reactflow-wrapper" ref={reactFlowWrapper}>
             <ReactFlow
@@ -220,6 +258,7 @@ const NestedFlow = () => {
                 onChange={(evt) => {
                   setColor(evt.target.value);
                   selectedNode.style.backgroundColor = evt.target.value;
+                  selectedNode.data.bgColor = evt.target.value;
                 }}
               />
               <p>Type: {selectedNode?.type}</p>

@@ -3,11 +3,6 @@
     height: inherit;
     min-width: 100px;
     min-height: 100px;
-    /* background: #FFBC97; */
-    /* position: re lative; */
     border: dotted 1px;
     box-sizing: border-box;
-    /* position: relative !important; 
-    z-index: -1 !important; */
   }
- 
