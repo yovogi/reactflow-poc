@@ -99,6 +99,7 @@ const NestedFlow = () => {
     const onConnect = useCallback((connection) => {
         console.log(connection);
         connection.type = 'smoothstep';
+        console.log(connection);
 
         setEdges((eds) => addEdge(connection, eds));
     }, []);
@@ -159,9 +160,6 @@ const NestedFlow = () => {
                     },
                 };
             }
-            console.log('drop over');
-            console.log(position.x);
-            console.log(position.y);
 
             let parentNode = nodes.find((node) => {
                 return (
@@ -182,12 +180,10 @@ const NestedFlow = () => {
             }
             setNodes((nds) => nds.concat(newNode));
         },
-        [reactFlowInstance]
+        [reactFlowInstance, nodes]
     );
 
     const onSelect = ({ nodes, edges }) => {
-        console.log('node selected');
-        console.log(nodes);
         console.log(selectedNode);
         if (selectedNode) {
             setColor(
@@ -234,12 +230,6 @@ const NestedFlow = () => {
         }
     };
 
-    const onNodeDragStop = (event, node, nodes) => {
-        console.log(nodes);
-        console.log(node.position.y);
-        console.log(node);
-    };
-
     return (
         <div>
             <div style={{ height: 800 }} className='dndflow'>
@@ -248,6 +238,7 @@ const NestedFlow = () => {
                     setEdges={setEdges}
                     onHighlight={onHighlight}
                     isHighlight={isHighlight}
+                    nodes={nodes}
                 />
                 <ReactFlowProvider>
                     <div className='reactflow-wrapper' ref={reactFlowWrapper}>
@@ -262,11 +253,11 @@ const NestedFlow = () => {
                             onDrop={onDrop}
                             onDragOver={onDragOver}
                             onNodeClick={onNodeClick}
-                            onNodeDragStop={onNodeDragStop}
                             nodeTypes={nodeTypes}
                             fitView
                             snapGrid={[50, 50]}
                             snapToGrid={true}
+                            maxZoom={2}
                         >
                             <Controls />
                             <MiniMap />
