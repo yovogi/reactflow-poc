@@ -35,16 +35,21 @@ const NestedFlow = () => {
     const [color, setColor] = useState('#FF0000');
     const [isDraggable, setIsDraggable] = useState(true);
     const [isHighlight, setHiglight] = useState(true);
+    const [snapshots, setSnapshots] = useState([
+        { nodes: initialNodes, edges: initialEdges },
+    ]);
+    const [currentSnapshot, setCurrentSnapshot] = useState(0);
+    const [skipSnapshot, setSkipSnapshot] = useState(false);
 
     const selectedNode = nodes?.find((n) => n.selected === true);
 
     const selectedEdge = edges.find((e) => e.selected === true);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            console.log(nodes);
-            console.log(edges);
-        }, 2000);
+        // const timer = setTimeout(() => {
+        //     console.log(nodes);
+        //     console.log(edges);
+        // }, 2000);
 
         setNodes((nds) =>
             nds.map((node) => {
@@ -79,8 +84,19 @@ const NestedFlow = () => {
             })
         );
 
+        const timer = setTimeout(() => {
+            if (!skipSnapshot) {
+                setSnapshots((prev) =>
+                    prev.concat({ nodes: nodes, edges: edges })
+                );
+                console.log('Snapshots:', snapshots);
+                setCurrentSnapshot(snapshots.length);
+            }
+        }, 500);
+        setSkipSnapshot(false);
+
         return () => {
-            clearInterval(timer);
+            clearTimeout(timer);
         };
     }, [
         nodeName,
@@ -93,7 +109,9 @@ const NestedFlow = () => {
         color,
         isDraggable,
         isHighlight,
+        edges,
         setHiglight,
+        // skipSnapshot,
     ]);
 
     const onConnect = useCallback((connection) => {
@@ -180,12 +198,13 @@ const NestedFlow = () => {
             }
             setNodes((nds) => nds.concat(newNode));
         },
-        [reactFlowInstance, nodes]
+        [reactFlowInstance, nodes, setNodes]
     );
 
     const onSelect = ({ nodes, edges }) => {
         console.log(selectedNode);
         if (selectedNode) {
+            setSkipSnapshot(true);
             setColor(
                 nodes[0]?.style?.backgroundColor
                     ? nodes[0].style.backgroundColor
@@ -228,10 +247,33 @@ const NestedFlow = () => {
             setNodes(node.data.nodes);
             setEdges(node.data.edges);
         }
+        setSkipSnapshot(true);
+    };
+
+    const undo = (index) => {
+        const newNodes = snapshots[currentSnapshot - 1].nodes;
+        const newEdges = snapshots[currentSnapshot - 1].edges;
+        setNodes(newNodes);
+        setEdges(newEdges);
+        setCurrentSnapshot((prev) => prev - 1);
+        setSkipSnapshot(true);
+    };
+
+    const redo = (index) => {
+        const newNodes = snapshots[currentSnapshot + 1].nodes;
+        const newEdges = snapshots[currentSnapshot + 1].edges;
+        setNodes(newNodes);
+        setEdges(newEdges);
+        setCurrentSnapshot((prev) => prev + 1);
+        setSkipSnapshot(true);
     };
 
     return (
         <div>
+            <p> Current Snapshot: {currentSnapshot}</p>
+            <p> Snapshots length: {snapshots.length}</p>
+            <p>skipSnapshot: {skipSnapshot.toString()}</p>
+            {/* <p>canUndo: {canUndo.toString()}</p> */}
             <div style={{ height: 800 }} className='dndflow'>
                 <Sidebar
                     setNodes={setNodes}
@@ -239,6 +281,11 @@ const NestedFlow = () => {
                     onHighlight={onHighlight}
                     isHighlight={isHighlight}
                     nodes={nodes}
+                    undo={undo}
+                    redo={redo}
+                    currentSnapshot={currentSnapshot}
+                    // canUndo={canUndo}
+                    // canRedo={canRedo}
                 />
                 <ReactFlowProvider>
                     <div className='reactflow-wrapper' ref={reactFlowWrapper}>

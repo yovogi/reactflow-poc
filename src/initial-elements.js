@@ -265,7 +265,7 @@ export const edgesData = [
         type: 'smoothstep',
         label: 'Barley grain',
         style: { stroke: 'black' },
-        selected: 'false',
+        selected: false,
         labelStyle: {
             // fill: "none",
             // stroke: "#646464",
