@@ -35,11 +35,13 @@ const NestedFlow = () => {
     const [color, setColor] = useState('#FF0000');
     const [isDraggable, setIsDraggable] = useState(true);
     const [isHighlight, setHiglight] = useState(true);
-    const [snapshots, setSnapshots] = useState([]);
+    const [snapshots, setSnapshots] = useState([
+        { nodes: initialNodes, edges: initialEdges },
+    ]);
     const [currentSnapshot, setCurrentSnapshot] = useState(0);
     const [skipSnapshot, setSkipSnapshot] = useState(false);
-    const [canUndo, setCanUndo] = useState(false);
-    const [canRedo, setCanRedo] = useState(false);
+    const [canUndo, setCanUndo] = useState(true);
+    const [canRedo, setCanRedo] = useState(true);
 
     const selectedNode = nodes?.find((n) => n.selected === true);
 
@@ -80,10 +82,15 @@ const NestedFlow = () => {
             })
         );
 
-        if (!skipSnapshot) {
-            setSnapshots((prev) => prev.concat({ nodes: nodes, edges: edges }));
-            setCurrentSnapshot(snapshots.length);
-        }
+        const snapshotInterval = setTimeout(() => {
+            if (!skipSnapshot) {
+                setSnapshots((prev) =>
+                    prev.concat({ nodes: nodes, edges: edges })
+                );
+                console.log('Snapshots:', snapshots);
+                setCurrentSnapshot(snapshots.length);
+            }
+        }, 500);
 
         if (snapshots.length > 1 && currentSnapshot > 1) {
             setCanUndo(true);
@@ -98,12 +105,16 @@ const NestedFlow = () => {
         }
 
         setSkipSnapshot(false);
+
+        return () => {
+            clearInterval(snapshotInterval);
+        };
     }, [
         nodeName,
         setNodes,
         setEdges,
         edges,
-        // selectedNode,
+        selectedNode,
         description,
         width,
         height,
@@ -111,6 +122,8 @@ const NestedFlow = () => {
         isDraggable,
         isHighlight,
         setHiglight,
+        // canUndo,
+        // canRedo,
     ]);
 
     const onConnect = useCallback((connection) => {
@@ -245,22 +258,24 @@ const NestedFlow = () => {
             setNodes(node.data.nodes);
             setEdges(node.data.edges);
         }
+
+        setSkipSnapshot(true);
     };
 
     const undo = (index) => {
-        console.log('undo to ', currentSnapshot, snapshots);
-        const newNodes = snapshots[currentSnapshot].nodes;
-        const newEdges = snapshots[currentSnapshot].edges;
+        const newNodes = snapshots[currentSnapshot - 1].nodes;
+        const newEdges = snapshots[currentSnapshot - 1].edges;
         setNodes(newNodes);
         setEdges(newEdges);
         setCurrentSnapshot((prev) => prev - 1);
         setSkipSnapshot(true);
+        console.log('Set current snapshot to :', currentSnapshot);
     };
 
     const redo = (index) => {
-        console.log('Redo to ', currentSnapshot, snapshots);
         const newNodes = snapshots[currentSnapshot + 1].nodes;
         const newEdges = snapshots[currentSnapshot + 1].edges;
+        console.log(currentSnapshot);
         setNodes(newNodes);
         setEdges(newEdges);
         setCurrentSnapshot((prev) => prev + 1);
