@@ -91,9 +91,10 @@ const NestedFlow = () => {
             setCanUndo(false);
         }
 
-        if (currentSnapshot < snapshots.length) {
-            console.log(currentSnapshot, snapshots.length - 1);
+        if (currentSnapshot < snapshots.length - 1) {
             setCanRedo(true);
+        } else {
+            setCanRedo(false);
         }
 
         setSkipSnapshot(false);
@@ -196,7 +197,7 @@ const NestedFlow = () => {
             }
             setNodes((nds) => nds.concat(newNode));
         },
-        [reactFlowInstance]
+        [reactFlowInstance, nodes, setNodes]
     );
 
     const onSelect = ({ nodes, edges }) => {
@@ -268,6 +269,7 @@ const NestedFlow = () => {
 
     console.log('Snapshots:', snapshots);
     console.log('currentSnapshot:', currentSnapshot);
+    console.log(nodes);
 
     return (
         <div>
