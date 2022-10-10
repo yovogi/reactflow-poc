@@ -34,7 +34,7 @@ export const nodesData = [
         // type:'group',
         // width: 400,
         // height: 200,
-        // "selected": true,
+        // selected: true,
         positionAbsolute: {
             x: -22.51249999999999,
             y: 1.3093749999999957,

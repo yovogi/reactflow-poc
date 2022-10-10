@@ -35,17 +35,18 @@ const NestedFlow = () => {
     const [color, setColor] = useState('#FF0000');
     const [isDraggable, setIsDraggable] = useState(true);
     const [isHighlight, setHiglight] = useState(true);
+    const [snapshots, setSnapshots] = useState([]);
+    const [currentSnapshot, setCurrentSnapshot] = useState(0);
+    const [skipSnapshot, setSkipSnapshot] = useState(false);
+    const [canUndo, setCanUndo] = useState(false);
+    const [canRedo, setCanRedo] = useState(false);
 
     const selectedNode = nodes?.find((n) => n.selected === true);
 
     const selectedEdge = edges.find((e) => e.selected === true);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            console.log(nodes);
-            console.log(edges);
-        }, 2000);
-
+        console.log('use effect runs');
         setNodes((nds) =>
             nds.map((node) => {
                 if (node.id === selectedNode?.id) {
@@ -79,14 +80,29 @@ const NestedFlow = () => {
             })
         );
 
-        return () => {
-            clearInterval(timer);
-        };
+        if (!skipSnapshot) {
+            setSnapshots((prev) => prev.concat({ nodes: nodes, edges: edges }));
+            setCurrentSnapshot(snapshots.length);
+        }
+
+        if (snapshots.length > 1 && currentSnapshot > 1) {
+            setCanUndo(true);
+        } else {
+            setCanUndo(false);
+        }
+
+        if (currentSnapshot < snapshots.length) {
+            console.log(currentSnapshot, snapshots.length - 1);
+            setCanRedo(true);
+        }
+
+        setSkipSnapshot(false);
     }, [
         nodeName,
         setNodes,
         setEdges,
-        selectedNode,
+        edges,
+        // selectedNode,
         description,
         width,
         height,
@@ -180,7 +196,7 @@ const NestedFlow = () => {
             }
             setNodes((nds) => nds.concat(newNode));
         },
-        [reactFlowInstance, nodes]
+        [reactFlowInstance]
     );
 
     const onSelect = ({ nodes, edges }) => {
@@ -230,8 +246,33 @@ const NestedFlow = () => {
         }
     };
 
+    const undo = (index) => {
+        console.log('undo to ', currentSnapshot, snapshots);
+        const newNodes = snapshots[currentSnapshot].nodes;
+        const newEdges = snapshots[currentSnapshot].edges;
+        setNodes(newNodes);
+        setEdges(newEdges);
+        setCurrentSnapshot((prev) => prev - 1);
+        setSkipSnapshot(true);
+    };
+
+    const redo = (index) => {
+        console.log('Redo to ', currentSnapshot, snapshots);
+        const newNodes = snapshots[currentSnapshot + 1].nodes;
+        const newEdges = snapshots[currentSnapshot + 1].edges;
+        setNodes(newNodes);
+        setEdges(newEdges);
+        setCurrentSnapshot((prev) => prev + 1);
+        setSkipSnapshot(true);
+    };
+
+    console.log('Snapshots:', snapshots);
+    console.log('currentSnapshot:', currentSnapshot);
+
     return (
         <div>
+            <p> Current Snapshot: {currentSnapshot}</p>
+            <p> Snapshots length: {snapshots.length}</p>
             <div style={{ height: 800 }} className='dndflow'>
                 <Sidebar
                     setNodes={setNodes}
@@ -239,6 +280,11 @@ const NestedFlow = () => {
                     onHighlight={onHighlight}
                     isHighlight={isHighlight}
                     nodes={nodes}
+                    undo={undo}
+                    redo={redo}
+                    currentSnapshot={currentSnapshot}
+                    canUndo={canUndo}
+                    canRedo={canRedo}
                 />
                 <ReactFlowProvider>
                     <div className='reactflow-wrapper' ref={reactFlowWrapper}>
