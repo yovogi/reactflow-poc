@@ -85,7 +85,7 @@ const NestedFlow = () => {
             setCurrentSnapshot(snapshots.length);
         }
 
-        if (snapshots.length > 1 && currentSnapshot > 1) {
+        if (snapshots.length > 1 && currentSnapshot >= 1) {
             setCanUndo(true);
         } else {
             setCanUndo(false);
